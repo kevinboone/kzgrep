@@ -33,7 +33,7 @@ be read as a zipfile.
    $ kzgrep -w 40 -ri --files "\*.epub" --entries "\*html" alien my\_epubs
 
 Search every entry whose filename ends in `html` in every zipfile 
-whose name ends in `.epub` in directory `my\_epubs`. The search
+whose name ends in `.epub` in directory `my_epubs`. The search
 is case-insensitive, and match lines are truncated to the 40 characters
 that contain the first match. Note the double-quotes around the 
 filenames, to prevent the shell expanding the wildcards before kzgrep has
@@ -72,7 +72,7 @@ The build process should be straightforward:
 -a,--all
 
 Include hidden files and directories when expanding
-directories using \fB--recurse\fR.
+directories using `--recurse`.
 
 -e,--no-entryname
 
@@ -125,8 +125,9 @@ to search if no output is being produced.
 A comma-separated list of file patterns to include in the search
 at the filesystem level. This is useful when searching recursively,
 in directories that contain many files which are not zipfiles.
-If this option is not set, then all files are included. Files that
-are not valid zipfiles will not be examined further, but finding out 
+If this option is not set, then all files are included. Even without
+this option, files that
+are not valid zipfiles will not be examined further; but finding out 
 that this is the case wastes time. See also `--entries`
 
 -h,--no-filename
@@ -177,7 +178,7 @@ whitespace or start/end of line.
 
 -q,--quiet
 
-Produce no normal outpout. Error messages may still be shown.
+Produce no normal output. Error messages may still be shown.
 `-q` is only useful in scripts which check the exit code to determine
 whether there were any matches. `-q` implies `--first` -- searching
 stops after the first match, because once a file has matched, nothing
@@ -211,7 +212,7 @@ files
 Because searching compressed archives is fundamentally different from
 searching specific files, `kzgrep` is not command-line compatible
 with `grep`. In fact, many of the less-widely used features of `grep`
-are not (yet) impleemnted at all.
+are not (yet) implemented at all.
 
 Broadly, the command-line switches `-I`, `--text`, `-r`, `-i`, `-n`
 and `-h` have the same meaning as they do for `grep`.
@@ -275,6 +276,12 @@ Because the filenames in a zipfile are not immediately visible,
 the patterns in `--entries` are case-insensitive, to reduce the
 risk of excluding entries by accident.
 
+The `--max-size` option also has the effect of excluding certain
+zipfile entries from consideration.
+
+`kzgrep` will warn if the inclusion criteria have the effect
+that no zipfile entries are searched.
+
 ## Exit code
 
 `kzgrep` returns 0 if at least one line matches in at least one entry
@@ -308,12 +315,12 @@ separate matches there are.
 ### File type detection
 
 Like `grep`, `kzgrep` divides files (that is, file entries in
-zipfiles) as either 'text' or 'binary'. It does this by reading
+zipfiles) into 'text' and 'binary'. It does this by reading
 up to a few hundred bytes from the start of the entry, and testing
 whether they can be interpreted as ASCII or UTF8. This approach is
 not foolproof -- some single-byte encodings that _could_ potentially
 be treated as text will be considered binary, and some kinds of
-non-text file could conceivably be treaed as text -- particular small
+non-text file could conceivably be treated as text -- particular small
 files. There are command-line options to control how file entries
 are interpreted, if `kzgrep` guesses wrongly. It should be remembered,
 however, that text files in an encoding other than the platform's 
@@ -338,7 +345,7 @@ through github.
 ## Revision history
 
 Date | Release | Comments
-=====|=========|=========
+-----|---------|---------
 2020-01-18|1.0a|First working release
 
 

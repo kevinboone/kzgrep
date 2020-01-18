@@ -91,8 +91,9 @@ to search if no output is being produced.
 A comma-separated list of file patterns to include in the search
 at the filesystem level. This is useful when searching recursively,
 in directories that contain many files which are not zipfiles.
-If this option is not set, then all files are included. Files that
-are not valid zipfiles will not be examined further, but finding out 
+If this option is not set, then all files are included. Even without
+this option, files that
+are not valid zipfiles will not be examined further; but finding out 
 that this is the case wastes time. See also \fB--entries\fR.
 .LP
 .TP
@@ -144,7 +145,7 @@ whitespace or start/end of line.
 .LP
 .TP
 .BI -q,\-\-quiet
-Produce no normal outpout. Error messages may still be shown.
+Produce no normal output. Error messages may still be shown.
 \fB-q\fR is only useful in scripts which check the exit code to determine
 whether there were any matches. \fB-q\fR implies \fB--first\fR -- searching
 stops after the first match, because once a file has matched, nothing
@@ -193,6 +194,13 @@ file patterns which may, and usually will, contain shell wildcards
 Because the filenames in a zipfile are not immediately visible, 
 the patterns in \fB--entries\fR are case-insensitive, to reduce the
 risk of excluding entries by accident.
+
+The \fB--max-size\fR option also has the effect of excluding certain
+zipfile entries from consideration.
+
+\fBkzgrep\fR will warn if the inclusion criteria have the effect
+that no zipfile entries are searched.
+
 
 .SH EXIT CODE
 
