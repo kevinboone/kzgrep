@@ -1,0 +1,238 @@
+.\" Copyright (C) 2020 Kevin Boone 
+.\" Permission is granted to any individual or institution to use, copy, or
+.\" redistribute this software so long as all of the original files are
+.\" included, that it is not sold for profit, and that this copyright notice
+.\" is retained.
+.\"
+.TH kzgrep 1 "Jan 2020"
+.SH NAME
+.B kzgrep - search zipfiles for regular expressions
+
+.SH SYNOPSIS
+.B kzgrep\ [options] {pattern} {files...}
+.PP
+
+.SH DESCRIPTION
+\fBkzgrep\fR is a utility broadly similar to \fBgrep\fR, that operates on
+the contents of zipfiles (including Java JAR files, EPUB documents,
+OpenDocument, and many other files that use the same archive format). 
+It is completely
+self-contained, and does not need to unpack archives completely to
+search them.
+
+Note that \fBkzgrep\fR is not an extension to \fBgrep\fR 
+-- it is an alternative for zipfiles. \fRkzgrep\fR ignores 
+completely any file that cannot be read as a zipfile. 
+
+.SH EXAMPLES
+
+   $ kzgrep -w 40 -ri --files "\*.epub" --entries "\*html" alien my\_epubs
+
+Search every entry whose filename ends in \fBhtml\fR in every zipfile
+whose name ends in \fR.epub\fB in directory \fBmy\_epubs\fR. The search
+is case-insensitive, and match lines are truncated to the 40 characters
+that contain the first match. 
+ 
+   $ kzgrep -I -r Main-Class Class \*.jar 
+
+Search only text entries in all \fR.jar\fB files for the 
+text \fBMain-Class\fR.
+
+    $ kzgrep --first foo bar.zip
+
+Display the first line that matches \fBfoo\fR in only 
+the first entry in \fBbar.zip\fR.
+
+    $ kzgrep --files *.odt -oir "(fred|bill)" letters/
+
+Search case-insensitively for the whole words 'fred' or 'bill' in
+\fBletters\fR and its subdirectories. 
+
+
+.SH "OPTIONS"
+.TP
+.BI -a,\-\-all
+Include hidden files and directories when expanding
+directories using \fB--recurse\fR.
+.LP
+.TP
+.BI -e,\-\-no-entryname
+Don't display the name of the zipfile entry where a match is
+found. This is useful in files like EPUB documents, where the 
+internal structure is of no interest to the user. This 
+option implicitly disables line numbers, even if \fB-n\fR is
+given.
+.LP
+.TP
+.BI \-\-entries\ pattern1,pattern2...
+A comma-separate list of file patterns to be examined in the
+zipfile index. For example, in searching an EPUB file we may only
+want to search the (X)HTML entries that contain the actual text,
+and not metadata or images. Note that, although zipfile entries
+can have pathnames, the test used by this option is against the
+filename only. There is at present no way to restrict the search
+only to specific directories inside a zipfile.
+
+NOTE: \fB--entries\fR is \fIcase-insensitive\fR, where \fB--files\fR is
+case-sensitive. 
+.LP
+.TP
+.BI -f,\-\-first 
+Stops searching in a particular zipfile after the search text has been
+found in an entry. 
+
+The search will continue with other zipfiles, if any are specified.
+
+Note that \fB--quiet\fR implies \fB--first\fR -- there is no point continuing
+to search if no output is being produced.
+.LP
+.TP
+.BI \-\-files\ pattern1,pattern2...
+A comma-separated list of file patterns to include in the search
+at the filesystem level. This is useful when searching recursively,
+in directories that contain many files which are not zipfiles.
+If this option is not set, then all files are included. Files that
+are not valid zipfiles will not be examined further, but finding out 
+that this is the case wastes time. See also \fB--entries\fR.
+.LP
+.TP
+.BI -h,\-\-no-filename
+Do not show the filename (or any other file data) when displaying
+lines that match.
+This is \fInot\fR the default when only one file is specified, 
+unlike \fIgrep\fR.
+For zipfiles, even one file will usually have multiple entries, and it is 
+often important to know which entry contains the match. If it does
+not matter which specific entry matches the pattern, consider using
+\fB--first\fR to speed things up. 
+.LP
+.TP
+.BI -i,\-\-ignore-case
+Ignore letter case, so far as possible, when matching a regular expression.
+Case is really only meaningful in Western alphabetic text.
+.LP
+.TP
+.BI -I
+Ignore file entries that appear to be non-text. See also \fB--text\fR.
+.LP
+.TP
+.BI -l,\-\-log-level\ N
+Set the logging level, from 0 (nothing) to 5 (huge amounts). Logging levels
+greater than 2 are probably only meaningful when read alongside the 
+program source code. It might sometimes be useful to set the logging level
+to 0, to supress warnings like "not a zipfile" in directory searches.
+.LP
+.TP
+.BI -m,\-\-max-size
+Sets the maximum (uncompressed) size of zipfile entry to examine.
+This limit exists to protect the utility from memory exhaustion if it is asked
+to search huge files. 
+\fBkzgrep\fR will warn if entries are encountered
+that exceed the limit, but will continue to examine other entries. 
+The default is 1Mb.
+.LP
+.TP
+.BI -n,\-\-line-number
+Diplay the line number of each match.
+.LP
+.TP
+.BI -o,\-\-word-regexp
+Enable 'word match' mode. In this mode, the search expression
+only matches
+a whole word, that is, if the surrounding characters are
+whitespace or start/end of line.
+.LP
+.TP
+.BI -q,\-\-quiet
+Produce no normal outpout. Error messages may still be shown.
+\fB-q\fR is only useful in scripts which check the exit code to determine
+whether there were any matches. \fB-q\fR implies \fB--first\fR -- searching
+stops after the first match, because once a file has matched, nothing
+is to be gained by carrying on if no output is being produced.
+.LP
+.TP
+.BI -r,\-\-recurse
+Descend into subdirectories. Symbolic links to directories are always
+followed. It is likely to be useful to specify \fB--files\fR in a
+search of this type.
+.LP
+.TP
+.BI -w,\-\-width
+Limit the matching text that is printed to N characters. N=0, the 
+default, indicates that the entire line should be printed, however
+long it is. Limiting the width often improves readability with certain
+file types. 
+.LP
+
+.SH RC FILE 
+
+The same options that are understood on the command line can also be
+given in the files \fB/etc/kzgrep.rc\fR or \fB$HOME/.kzgrep.rc\fR. 
+For example,
+to ensure that all searches are case-insensitive, add to one of these
+files
+
+    ignore-case=1
+
+.SH INCLUSION CRITERIA
+
+When searching recursively, it is usually helpful to have a way to 
+specify only certain file patterns to process. This is the 
+purpose of the \fB--files\fR option. However, it is also sometimes 
+useful to restrict the search only to particular zipfile entries.
+For example, it might be necessary to search only the (text)
+manifest file \fBMANIFEST.MF\fR in a Java JAR file. In other circumstances
+it could be useful to search only HTML or XML files in a zipfile.
+
+Restricting the zipfile entries to search is purpose of the
+\fB--entries\fR option.
+
+Both \fB--files\fR and \fB--entries\fR take a comma-separated list of
+file patterns which may, and usually will, contain shell wildcards
+? or *. Only the filename part of the path is matched.
+Because the filenames in a zipfile are not immediately visible, 
+the patterns in \fB--entries\fR are case-insensitive, to reduce the
+risk of excluding entries by accident.
+
+.SH EXIT CODE
+
+\fBkzgrep\fR returns 0 if at least one line matches in at least one entry
+in at least one zipfile, and 1 if there is no such match. If an 
+error occurs that prevents even starting to search,
+the exit code is 2. These values are broadly in line with traditional
+\fBgrep\fR.
+
+.SH LIMITATIONS
+
+\fBkzgrep\fR supports only the 'deflate' method of compression in
+zipfiles. Although the original PKZIP format allows for many different
+compression methods, 'deflate' is almost ubiquitous.
+
+Like \fBgrep\fR, \fBkzgrep\fR divides files (that is, file entries in
+zipfiles) as either 'text' or 'binary'. It does this by reading
+up to a few hundred bytes from the start of the entry, and testing
+whether it can be interpreted as ASCII or UTF8. This approach is
+not foolproof -- some single-byte encodings that could potentially
+be treated as text will be considered binary, and some kinds of
+non-text file could conceivably be treaed as text -- particular small
+files. There are command-line options to control how file entries
+are interpreted, if \fRkzgrep\fR guesses wrongly. It should be remembered,
+however, that text files in an encoding other than the platform's 
+default are unlikely to be processed meaningfully, even if they are
+correctly treated as text.
+
+
+.SH AUTHOR AND COPYRIGHT
+
+\fBkzgrep\fR is copyright (c)2020 Kevin Boone, and is open source under
+the terms of the GNU Public Licence, v3.0. I have provided the code
+in the hope that it will be useful, but there is no warranty of any
+kind.
+
+.SH MORE INFORMATION 
+
+See the project page on github: \fBhttps://github.com/kevinboone/kzgrep\fR.
+
+
+
+.\" end of file

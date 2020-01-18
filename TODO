@@ -1,0 +1,8 @@
+- Allow the choice whether to follow directory links or not
+- Provide option to stay in one filesystem when recursing
+- Make --max-size read 1M, 2G, etc
+- Reset terminal after exiting with ctrl+c
+- -x whole line matches
+- Highlight multiple matches
+- Think about encodings other than ASCII/UTF8
+- Improve the line splitting with multi-byte characters
